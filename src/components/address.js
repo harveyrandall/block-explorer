@@ -117,7 +117,7 @@ const Wallet = (props) => {
 
 		if(props.data.txs.length > 0) {
 			transactions = props.data.txs.map((val, ind) => {
-				return <Transaction currentWallet={props.data.address} data={val} confirmed={val.inputs[0].witness} key={ind} />;
+				return <Transaction currentWallet={props.data.address} data={val} key={ind} />;
 			});
 		} else {
 			transactions = <li className="list-group-item">No transactions so far</li>;
@@ -153,6 +153,7 @@ const Wallet = (props) => {
 };
 
 const Transaction = (props) => {
+	/*
 	let transactionType;
 	if(props.currentWallet === props.data.inputs[0].prev_out.addr) {
 		transactionType = "list-group-item transaction list-group-item-danger";
@@ -168,6 +169,46 @@ const Transaction = (props) => {
 	const receivers = props.confirmed.length > 0 ? props.data.out : new Array(props.data.out.find((val) => {
 		return val.addr === props.currentWallet;
 	}));
+	*/
+
+	/*
+	* If lock time is equal to 0 then the transaction is unconfirmed
+	* Use this to determine status and background colour of list item
+	 */
+	const confirmed = props.data.lock_time > 0 ? true : false;
+
+	/*
+	* Determine the button shown depending on whether the transaction is confirmed or not
+	 */
+	const status = confirmed ?
+						<button type="button" className="btn btn-primary">Confirmed!</button> :
+						<button type="button" className="btn btn-warning">Unconfirmed!</button>;
+
+	const transaction_index = props.data.tx_index;
+
+	/*
+	* Determine whether the transaction was sent or received by this address
+	 */
+
+	const transactionType = props.data.inputs.find((val) => { return val.prev_out.addr === props.currentWallet }) ?
+								"list-group-item transaction list-group-item-danger" :
+								"list-group-item transaction list-group-item-success";
+
+	/*
+	* Filter inputs by transaction index
+	 */
+	const senders = props.data.inputs.filter((val) => {
+		return val.prev_out.spending_outpoints.filter((tx) => {
+			return tx.tx_index === transaction_index;
+		});
+	});
+
+	/*
+	* If current searched for wallet is one of the receivers then filter out all other addresses
+	*/
+	const receivers = props.data.out.find((val) => { return val.addr === props.currentWallet }) ?
+						props.data.out.filter((val) => { return val.addr === props.currentWallet }) :
+						props.data.out;
 
 	return (
 		<li className={transactionType}>
@@ -186,7 +227,7 @@ const Transaction = (props) => {
 						</div>
 					);
 				})}
-				<div class="status">
+				<div className="status">
 					{status}
 				</div>
 			</div>
