@@ -1,0 +1,68 @@
+.row {
+	flex-direction: row;
+	justify-content: space-around;
+}
+
+.card-header {
+	text-align: center;
+	font-weight:bold;
+}
+
+.summary, .transactions {
+	padding: 0px;
+}
+
+.summary-item {
+	display:flex;
+	flex-direction: row;
+	justify-content: space-between;
+}
+
+.item-key {
+	font-weight: bold;
+}
+
+.btc-value::after {
+	content: "\20BF";
+	font-weight: 500;
+	margin-left: 5px;
+}
+
+/* Transactions */
+.transaction {
+	display:flex;
+	flex-direction: row;
+	justify-content: space-between;
+}
+
+.senders, .receivers {
+	display:flex;
+	flex-direction: column;
+	width: 45%;
+}
+.receivers {
+	justify-content: space-between;
+}
+.receiver {
+	display:flex;
+	flex-direction: row;
+	justify-content: space-between;
+}
+.amount {
+	color: black;
+}
+.status {
+	align-self: flex-end;
+	margin-top:10px;
+}
+
+.total {
+	display:flex;
+	flex-direction: row;
+	justify-content: flex-end;
+	align-items: center;
+	position: absolute;
+	bottom:10px;
+	height: 50px;
+	width: calc(100% - 40px);
+}
