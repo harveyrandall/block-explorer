@@ -32,7 +32,6 @@ export default class Address extends Component {
 			})
 			.then(data => {
 				if(data) {
-					console.log(data.txs[0]);
 					this.setState({
 						address: walletAddress,
 						wallet: data
@@ -68,7 +67,6 @@ export default class Address extends Component {
 	}
 
 	updateTransactions(transaction) {
-		console.log(JSON.parse(transaction.data).x);
 		this.setState(state => {
 			let wallet = Object.assign({}, this.state.wallet);    //creating copy of object
 			wallet.txs = [JSON.parse(transaction.data).x, ...wallet.txs];                        //updating value
@@ -189,8 +187,6 @@ const Transaction = (props) => {
 						<button type="button" className="btn btn-warning">Unconfirmed!</button>;
 
 	const txtime = new Date(props.data.time * 1000).toLocaleString();
-
-	const transaction_index = props.data.tx_index;
 
 	/*
 	* Determine whether the transaction was sent or received by this address

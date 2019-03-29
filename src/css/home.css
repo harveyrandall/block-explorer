@@ -1,6 +1,33 @@
-.raddress {
+.transaction {
+	animation: background-flash 0.2s ease-in-out;
+}
+
+.senders, .receivers {
+	display:flex;
+	flex-direction: column;
+}
+
+.senders {
+	width:30%!important;
+}
+
+.receivers {
+	justify-content: flex-start;
+	width: 45%;
+}
+
+.raddress, .sender {
 	white-space: nowrap;
 	overflow:hidden;
 	text-overflow: ellipsis;
 	max-width:75%;
+}
+
+@keyframes background-flash {
+	0% {
+		height: 0px;
+	}
+	100% {
+		height:100px;
+	}
 }

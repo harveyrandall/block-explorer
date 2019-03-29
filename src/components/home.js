@@ -69,8 +69,6 @@ export default class Home extends Component {
 const Transaction = (props) => {
 	const data = JSON.parse(props.data.data);
 
-	console.log(data);
-
 	/*
 	* Get all the senders of the transaction
 	 */
@@ -83,11 +81,13 @@ const Transaction = (props) => {
 		return val.addr !== undefined && val.value > 0;
 	});
 
+	const timeAgo = Math.round((new Date()).getTime()/1000) - data.x.time;
+
 	return (
 		<li className="list-group-item transaction">
 			<div className="senders">
 				{senders.map((val, index) => {
-					return <div key={index}>{val.prev_out.addr}</div>;
+					return <div className="sender" key={index}>{val.prev_out.addr}</div>;
 				})}
 			</div>
 			<div>&rarr;</div>
@@ -100,6 +100,9 @@ const Transaction = (props) => {
 						</div>
 					);
 				})}
+			</div>
+			<div className="time">
+				<p>{timeAgo}s ago</p>
 			</div>
 		</li>
 	);

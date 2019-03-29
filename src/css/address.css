@@ -41,7 +41,7 @@
 	width: 45%;
 }
 .receivers {
-	justify-content: space-between;
+	justify-content: flex-start;
 }
 .receiver {
 	display:flex;
