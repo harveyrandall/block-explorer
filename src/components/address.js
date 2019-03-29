@@ -154,24 +154,6 @@ const Wallet = (props) => {
 
 const Transaction = (props) => {
 	/*
-	let transactionType;
-	if(props.currentWallet === props.data.inputs[0].prev_out.addr) {
-		transactionType = "list-group-item transaction list-group-item-danger";
-	} else {
-		transactionType = "list-group-item transaction list-group-item-success";
-	}
-
-	const status = props.confirmed.length > 0 ?
-						<button type="button" class="btn btn-primary">Confirmed!</button> :
-						<button type="button" class="btn btn-warning">Unconfirmed!</button>;
-
-	const senders = props.data.inputs;
-	const receivers = props.confirmed.length > 0 ? props.data.out : new Array(props.data.out.find((val) => {
-		return val.addr === props.currentWallet;
-	}));
-	*/
-
-	/*
 	* If lock time is equal to 0 then the transaction is unconfirmed
 	* Use this to determine status and background colour of list item
 	 */
@@ -209,6 +191,7 @@ const Transaction = (props) => {
 	const receivers = props.data.out.find((val) => { return val.addr === props.currentWallet }) ?
 						props.data.out.filter((val) => { return val.addr === props.currentWallet }) :
 						props.data.out;
+						
 
 	return (
 		<li className={transactionType}>
