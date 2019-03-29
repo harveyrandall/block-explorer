@@ -4,14 +4,14 @@ Production build available on Heroku at [https://block-addr-explorer.herokuapp.c
 
 ## Installation
 To download the project and install dependencies:
-```sh
+	```sh
 	git clone https://github.com/harveyrandall/block-explorer
 	cd block-explorer
 	yarn install
-```
+	```
 
 ## Running project
-```sh
+	```sh
 	yarn start
-```
+	```
 This will run the project and open in browser. If the project is not opened it can be found in browser at [https://localhost:3000/](https://localhost:3000/)
