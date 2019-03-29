@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import '../css/home.css';
 //import Websocket from 'react-websocket';
 
 export default class Home extends Component {
@@ -29,24 +30,36 @@ export default class Home extends Component {
 	}
 
 	handleNewTransactions(transaction) {
-		const connection = this.state.connection;
 		this.setState(state => {
-			const transactions = state.transactions.concat(transaction.data);
-
+			const transactions = [transaction, ...this.state.transactions];
+			if(transactions.length >= 25) {
+				transactions.splice(-1,1);
+			}
 			return {
 				transactions
 			};
 		});
-		connection.send(JSON.stringify({"op": "unconfirmed_unsub"}));
 	}
 
 	render() {
+		const transactions = this.state.transactions.length > 0 ?
+								this.state.transactions.map((val, index) => {
+									return <Transaction key={index} data={val} />;
+								}) :
+								"Awaiting new transactions.";
+
 		return (
 			<div className="container my-5">
 				<div className="row unconfirmed_txs">
-					{this.state.transactions.map((val, index) => {
-						return <Transaction key={index} data={val} />;
-					})}
+					<div className="card col-12 col-sm-12 col-lg-12 px-0">
+						<div className="card-header">
+							Unconfirmed Transactions
+						</div>
+
+						<ul className="list-group list-group-flush">
+							{transactions}
+						</ul>
+					</div>
 				</div>
 			</div>
 		);
@@ -54,11 +67,40 @@ export default class Home extends Component {
 }
 
 const Transaction = (props) => {
-	const data = JSON.parse(props.data);
+	const data = JSON.parse(props.data.data);
+
 	console.log(data);
+
+	/*
+	* Get all the senders of the transaction
+	 */
+	const senders = data.x.inputs;
+
+	/*
+	* Get all receivers of transaction
+	*/
+	const receivers = data.x.out.filter((val) => {
+		return val.addr !== undefined && val.value > 0;
+	});
+
 	return (
-		<div className="transaction">
-			{data.op}
-		</div>
+		<li className="list-group-item transaction">
+			<div className="senders">
+				{senders.map((val, index) => {
+					return <div key={index}>{val.prev_out.addr}</div>;
+				})}
+			</div>
+			<div>&rarr;</div>
+			<div className="receivers">
+				{receivers.map((val, index) => {
+					return (
+						<div className="receiver" key={index}>
+							<div className="raddress">{val.addr}</div>
+							<div className="amount btc-value">{val.value / 100000000}</div>
+						</div>
+					);
+				})}
+			</div>
+		</li>
 	);
 }
