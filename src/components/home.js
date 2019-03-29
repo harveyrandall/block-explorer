@@ -23,25 +23,42 @@ export default class Home extends Component {
 		connection.onmessage = this.handleNewTransactions;
 	}
 
-	handleNewTransactions(transaction) {
-		transaction = JSON.parse(transaction.data);
-		console.log(transaction);
-		let transactions = this.state.transactions;
-		transactions.push(transaction.data);
-		this.setState({
-			transactions: transactions
-		});
+	componentWillUnmount() {
+		const connection = this.state.connection;
+		connection.send(JSON.stringify({"op":"unconfirmed_unsub"}));
 	}
 
+	handleNewTransactions(transaction) {
+		const connection = this.state.connection;
+		this.setState(state => {
+			const transactions = state.transactions.concat(transaction.data);
 
-
-
+			return {
+				transactions
+			};
+		});
+		connection.send(JSON.stringify({"op": "unconfirmed_unsub"}));
+	}
 
 	render() {
 		return (
-			<div>
-				Hello World
+			<div className="container my-5">
+				<div className="row unconfirmed_txs">
+					{this.state.transactions.map((val, index) => {
+						return <Transaction key={index} data={val} />;
+					})}
+				</div>
 			</div>
 		);
 	}
+}
+
+const Transaction = (props) => {
+	const data = JSON.parse(props.data);
+	console.log(data);
+	return (
+		<div className="transaction">
+			{data.op}
+		</div>
+	);
 }
