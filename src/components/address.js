@@ -8,15 +8,20 @@ export default class Address extends Component {
 		this.state = {
 			connection: new WebSocket('wss://ws.blockchain.info/inv'),
 			isValid: true,
+			address: "",
 			wallet: {}
 		};
 		this.updateTransactions = this.updateTransactions.bind(this);
+		this.connectToValidAddress = this.connectToValidAddress.bind(this);
 	}
 
 
 	componentDidMount() {
 		let walletAddress = new URLSearchParams(this.props.location.search).get('addr');
 		let page = new URLSearchParams(this.props.location.search).get('page') ? "&offset=" + new URLSearchParams(this.props.location.search).get('page')*50 : "";
+
+		this.connectToValidAddress(walletAddress);
+
 		fetch(`https://blockchain.info/rawaddr/${walletAddress}?cors=true&format=json${page}`)
 			.then(res => {
 				if(res.status === 500) {
@@ -27,41 +32,58 @@ export default class Address extends Component {
 			})
 			.then(data => {
 				if(data) {
+					console.log(data.txs[0]);
 					this.setState({
+						address: walletAddress,
 						wallet: data
 					});
-					const connection = this.state.connection;
-					connection.onopen = () => {
-						let message = {
-							"op": "addr_sub",
-							"addr": walletAddress
-						};
-						connection.send(JSON.stringify(message));
-					};
-					connection.onmessage = this.updateTransactions;
 				} else {
 					this.setState({
 						isValid: false,
-						wallet: {
-							address: walletAddress
-						}
+						address: walletAddress
 					});
 				}
 			});
 	}
 
-	updateTransactions(transaction) {
-		this.setState(state => {
-			const transactions = [transaction, ...state.transactions];
+	componentWillUnmount() {
+		const connection = this.state.connection;
+		const message = {
+			"op": "addr_unsub",
+			"addr": this.state.address
+		};
+		connection.send(JSON.stringify(message));
+	}
 
+	connectToValidAddress(addr) {
+		const connection = this.state.connection;
+		connection.onopen = () => {
+			let message = {
+				"op": "addr_sub",
+				"addr": addr
+			};
+			connection.send(JSON.stringify(message));
+		};
+		connection.onmessage = this.updateTransactions;
+	}
+
+	updateTransactions(transaction) {
+		console.log(JSON.parse(transaction.data).x);
+		this.setState(state => {
+			let wallet = Object.assign({}, this.state.wallet);    //creating copy of object
+			wallet.txs = [JSON.parse(transaction.data).x, ...wallet.txs];                        //updating value
+
+			if(wallet.txs.length >= 75) {
+				wallet.txs.splice(-1,1);
+			}
 			return {
-				transactions
+				wallet
 			};
 		});
 	};
 
 	render() {
-		let content = this.state.isValid ? <Wallet data={this.state.wallet} /> : <InvalidAddress address={this.state.wallet.address} />;
+		let content = this.state.isValid ? <Wallet data={this.state.wallet} /> : <InvalidAddress address={this.state.address} />;
 		return (
 			<div className="container my-5">
 				{content}
@@ -166,6 +188,8 @@ const Transaction = (props) => {
 						<button type="button" className="btn btn-primary">Confirmed!</button> :
 						<button type="button" className="btn btn-warning">Unconfirmed!</button>;
 
+	const txtime = new Date(props.data.time * 1000).toLocaleString();
+
 	const transaction_index = props.data.tx_index;
 
 	/*
@@ -178,20 +202,22 @@ const Transaction = (props) => {
 
 	/*
 	* Filter inputs by transaction index
-	 */
+
 	const senders = props.data.inputs.filter((val) => {
 		return val.prev_out.spending_outpoints.filter((tx) => {
 			return tx.tx_index === transaction_index;
 		});
 	});
+	*/
+	const senders = props.data.inputs;
 
 	/*
 	* If current searched for wallet is one of the receivers then filter out all other addresses
 	*/
 	const receivers = props.data.out.find((val) => { return val.addr === props.currentWallet }) ?
 						props.data.out.filter((val) => { return val.addr === props.currentWallet }) :
-						props.data.out;
-						
+						props.data.out.filter((val) => { return val.addr !== undefined && val.value > 0; });
+
 
 	return (
 		<li className={transactionType}>
@@ -211,6 +237,7 @@ const Transaction = (props) => {
 					);
 				})}
 				<div className="status">
+					<button type="button" className="btn btn-primary mr-2">{txtime}</button>
 					{status}
 				</div>
 			</div>
